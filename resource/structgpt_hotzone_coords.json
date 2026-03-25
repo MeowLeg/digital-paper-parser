@@ -1,0 +1,72 @@
+[
+  {
+    "label": "title",
+    "bbox": [
+      100,
+      50,
+      800,
+      150
+    ],
+    "confidence": 0.98
+  },
+  {
+    "label": "text",
+    "bbox": [
+      50,
+      200,
+      850,
+      600
+    ],
+    "confidence": 0.95
+  },
+  {
+    "label": "list",
+    "bbox": [
+      50,
+      350,
+      250,
+      450
+    ],
+    "confidence": 0.95
+  },
+  {
+    "label": "figure",
+    "bbox": [
+      300,
+      400,
+      500,
+      600
+    ],
+    "confidence": 0.95
+  },
+  {
+    "label": "advertisement",
+    "bbox": [
+      600,
+      350,
+      800,
+      500
+    ],
+    "confidence": 0.95
+  },
+  {
+    "label": "header",
+    "bbox": [
+      100,
+      50,
+      800,
+      150
+    ],
+    "confidence": 0.95
+  },
+  {
+    "label": "footer",
+    "bbox": [
+      100,
+      650,
+      800,
+      700
+    ],
+    "confidence": 0.95
+  }
+]
