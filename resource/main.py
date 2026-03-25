@@ -39,7 +39,7 @@ def __update_article(ra, d):
 
 
 def __merge_content(ra, rest_datas, title, db):
-    title = ra["title"]
+    title = ra["title"].replace(" ", "")
     page_no = __convert_page_no(ra["next_page"])
     # target_page_articles = [a for a in datas[i+1] if __convert_page_no(a["page_no"]) == page_no]
     # for d in datas[i+1:]:
@@ -50,9 +50,10 @@ def __merge_content(ra, rest_datas, title, db):
             compare_title_result = compare_title(
                 "http://localhost:11434", "qwen3.5:4b", [d["title"], title]
             )
+            d_title = d["title"].replace(" ", "")
             if len(d["title"]) > 0 and (
                 (compare_title_result is not None and compare_title_result >= THRESHOLD)
-                or d["title"] in title
+                or d_title in title
             ):
                 print(idx, d["title"])
                 __update_article(ra, d)
