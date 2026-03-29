@@ -28,7 +28,13 @@ class PdfParser:
     def parse(self, pdf_path: str):
         print(f"[DEBUG] 开始解析PDF: {pdf_path}")
         try:
-            pages = convert_from_path(pdf_path, poppler_path=r'D:\poppler-25.12.0\Library\bin')
+            import platform
+            system = platform.system()
+            if system == 'Windows':
+                pages = convert_from_path(pdf_path, poppler_path=r'D:\poppler-25.12.0\Library\bin')
+            else:
+                # macOS/Linux系统下，poppler一般在默认PATH中
+                pages = convert_from_path(pdf_path)
             print(f"[DEBUG] PDF页数: {len(pages)}")
             img_buffer = BytesIO()
             pages[0].save(img_buffer, format="PNG")
