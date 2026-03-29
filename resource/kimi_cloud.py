@@ -28,7 +28,9 @@ class PdfParser:
     def parse(self, pdf_path: str):
         print(f"[DEBUG] 开始解析PDF: {pdf_path}")
         try:
-            pages = convert_from_path(pdf_path, poppler_path=r'D:\poppler-25.12.0\Library\bin')
+            pages = convert_from_path(
+                pdf_path, poppler_path=r"D:\poppler-25.12.0\Library\bin"
+            )
             print(f"[DEBUG] PDF页数: {len(pages)}")
             img_buffer = BytesIO()
             pages[0].save(img_buffer, format="PNG")
@@ -110,13 +112,9 @@ class PdfParser:
                         "role": "assistant",
                         "content": "如文章末尾有“下紧转第x版”的，在返回的json中，next_page字段填写下一页的版面号，且content中不包含“下紧转第x版”",
                     },
-                    # {
-                    #     "role": "assistant",
-                    #     "content": "去掉内容开头“上紧接第x版”这类字符，如有该字符串则has_previouse为true"
-                    # },
                     {
                         "role": "assistant",
-                        "content": "如果文章以“上紧接第x版”这类字符开头的，如无法确定标题则空着，内容去掉“上紧接第x版”这类字符，has_previous设置为true",
+                        "content": "如果文章以“上紧接第x版”字符开头的，如在此之前没有标题文字则标题为空，内容去掉“上紧接第x版”，has_previous设置为true",
                     },
                     {
                         "role": "assistant",
@@ -217,7 +215,14 @@ class PdfParser:
                 "data": [],
             }
 
-        print(ret_str)
+        try:
+            # 安全打印，处理编码问题
+            try:
+                print(ret_str)
+            except UnicodeEncodeError:
+                print(ret_str.encode("utf-8", errors="replace").decode("utf-8"))
+        except Exception as print_e:
+            print(f"[DEBUG] 打印输出时出错: {print_e}")
         try:
             ret = json.loads(ret_str)
             print(f"[DEBUG] JSON解析成功，文章数: {len(ret.get('data', []))}")

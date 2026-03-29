@@ -24,7 +24,7 @@ THRESHOLD = 0.9
 
 
 def __update_article(ra, d):
-    ra["content"] += d["content"]
+    ra["content"] += "\n" + d["content"]
     # 合并作者、通讯员、照片
     if ra["author"] == "" and d["author"]:
         ra["author"] = d["author"]
@@ -64,19 +64,37 @@ def __merge_content(ra, rest_datas, title, db):
                 if len(d["next_page"]) > 0:
                     __merge_content(ra, rest_datas[idx + 1 :], title, db)
                 return
-    # for idx, d in enumerate(rest_datas):
-    #     pn = __convert_page_no(d["page_no"])
-    #     if pn == page_no and d["has_previous"]:
-    #         __update_article(ra, d)
-    #         # 更新数据库中原文章的内容
-    #         db.update_article_content(ra["id"], ra["content"])
-    #         # 删除已经被合并的文章
-    #         db.delete_article(d["id"])
-    #         if len(d["next_page"]) > 0:
-    #             __merge_content(ra, rest_datas[idx + 1 :], title, db)
 
 
-def merge_content(datas, db):
+def __merge_content_last(ra, rest_datas, title, db):
+    title = ra["title"].replace(" ", "")
+    cur_page_no = __convert_page_no(ra["page_no"])
+    page_no = __convert_page_no(ra["next_page"])
+    is_last_one = True
+    target_article = None
+    for idx, d in enumerate(rest_datas):
+        pn = __convert_page_no(d["page_no"])
+        if pn == cur_page_no and len(d["next_page"]) > 0:
+            is_last_one = False
+            print("merge last error: 该文章不是最后一篇需要合并的")
+            return
+        if pn == page_no and d["has_previous"]:
+            if not target_article:
+                target_article = d
+            else:
+                print("merge last error: 目标文章不止一个")
+                break
+    if target_article:
+        __update_article(ra, target_article)
+        # 更新数据库中原文章的内容
+        db.update_article_content(ra["id"], ra["content"])
+        # 删除已经被合并的文章
+        db.delete_article(target_article["id"])
+        if len(target_article["next_page"]) > 0:
+            __merge_content_last(ra, rest_datas[idx + 1 :], title, db)
+
+
+def merge_content(datas, db, mtd="__merge_content"):
     """
     转版内容合并.
     """
@@ -85,7 +103,7 @@ def merge_content(datas, db):
         # if data["dump"] and len(data["next_page"]) > 0:
         if len(data["next_page"]) > 0:
             print("开始比对：", data["title"])
-            __merge_content(datas[idx], datas[idx + 1 :], data["title"], db)
+            globals()[mtd](datas[idx], datas[idx + 1 :], data["title"], db)
 
 
 def load_parsed_record(record_file: str) -> set:
@@ -205,13 +223,14 @@ def main(date_eles: list[str] = []):
 
     print(f"\n所有PDF解析完成，共写入 {total_insert} 篇文章")
 
-    # # 从数据库读取当天所有文章进行合并处理
+    # 从数据库读取当天所有文章进行合并处理
     print("开始读取数据库中的文章...")
     all_articles = db.get_articles_by_date(current_date)
     print(f"读取到 {len(all_articles)} 篇文章，开始合并转版内容...")
 
-    # # 在所有版面都写入数据库后进行合并
+    # 在所有版面都写入数据库后进行合并
     merge_content(all_articles, db)
+    merge_content(all_articles, db, "__merge_content_last")
     print("转版内容合并完成")
 
     # 3. 过滤部门
