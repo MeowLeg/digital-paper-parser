@@ -304,12 +304,29 @@ def monitor_task():
         time.sleep(CHECK_INTERVAL)
 
 
+def check_already_parsed():
+    """检查是否已经解析过今天的数据"""
+    today = datetime.now().strftime("%Y-%m-%d")
+    parsed_count = get_today_parsed_count()
+    expected_count = get_expected_pdf_count()
+    
+    if parsed_count >= expected_count and expected_count > 0:
+        log(f"[跳过] 今日已解析 {parsed_count}/{expected_count} 个版面，无需重复执行")
+        return True
+    return False
+
+
 def main():
     """主函数"""
     global monitor_running
 
     log("=" * 50)
     log("电子报解析任务监控守护进程启动")
+
+    # 检查是否已经解析过
+    if check_already_parsed():
+        log("监控守护进程退出")
+        return 0
 
     # 启动主任务
     run_main_task()
