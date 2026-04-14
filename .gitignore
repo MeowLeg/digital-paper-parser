@@ -1,5 +1,12 @@
 /target
 /.pycache
+__pycache__/
+*.pyc
+*.log
+*.pdf
+.env
+daily.db
+"daily - 副本.db"
 /resource/舟山日报
 /resource/special
 /resource/tests
